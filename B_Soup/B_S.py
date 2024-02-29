@@ -1,5 +1,7 @@
 import requests 
+import sqlite3
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 # Requisição para o site
 link = "https://www.google.com/search?q=dolar+hoje"
@@ -25,4 +27,26 @@ print("é")
 cotacao = site.find("span", class_= "SwHCTb")
 print(cotacao["data-value"])
 
+###########################################################
+conn = sqlite3.connect('dados_cotacao.bd')
 
+conn.execute('''CREATE TABLE IF NOT EXISTS cotacao (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data_pesquisa TEXT,
+                valor_cotacao REAL)'''
+            )
+
+conn = sqlite3.connect('dados_cotacao.bd')
+
+data_pesquisa = datetime.now() .strftime("%Y-%m-%d %H:%M:%S")
+
+valor_cotacao = cotacao["data-value"]
+
+conn.execute('''
+             INSERT INTO cotacao (data_pesquisa, valor_cotacao)
+             VALUES (?, ?)
+             ''', (data_pesquisa, valor_cotacao))
+
+conn.commit()
+
+conn.close()
